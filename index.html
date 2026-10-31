@@ -65,6 +65,9 @@
 .top-inner>.search-wrap #searchResults{position:absolute;top:calc(100% + 6px);right:0;left:0;z-index:80;max-height:65vh;overflow:auto;box-shadow:0 14px 32px rgba(50,10,20,.16)}
 @media(max-width:760px){.top-inner>.search-wrap{order:3;flex:1 0 100%;width:100%;margin-left:0}.top-inner{gap:8px}.top-inner>.brand{flex:1}}
 .room-plan-field{margin-top:12px}.room-plan-notice{color:#9a5b00;font-size:13px;margin:7px 0}.room-plan-notice:empty{display:none}
+
+/* Phản hồi CBCT */
+.feedback-card{margin-top:0}.feedback-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.feedback-card .field{margin:0 0 12px}.feedback-card input,.feedback-card select,.feedback-card textarea{width:100%;max-width:100%;box-sizing:border-box}.feedback-card textarea{min-height:116px;resize:vertical}.feedback-wide{grid-column:1/-1}.feedback-status{margin-top:12px;padding:12px;border-radius:10px;background:#f4f4f5;color:#27272a}.feedback-status:empty{display:none}.feedback-status.success{background:#eaf8ef;color:#126b35}.feedback-status.error{background:#fff1f2;color:#a1152a}.feedback-card button:disabled{opacity:.65;cursor:wait}@media(max-width:600px){.feedback-grid{grid-template-columns:1fr}}
 </style>
 <style>
 /* Adjustments from DIEUCHINH CBCT */
@@ -128,6 +131,10 @@
 #roomPreview.room-preview{width:min(100%,680px);margin:0 auto;}
 #roomPreview.room-preview img{width:100%;height:auto;}
 @media(max-width:680px){#roomPreview.room-preview{width:100%;}}
+</style><style>/* Hai khung Cong cu nhanh can deu */
+#page-tools .tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+#page-tools .tools-grid>.card{margin-top:0;min-width:0;height:100%}
+@media(max-width:700px){#page-tools .tools-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 <header class="topbar">
@@ -186,7 +193,7 @@
  <label>Giờ bắt đầu ca thi<select id="examStart" aria-label="Chọn giờ bắt đầu ca thi"><option value="07:30">07g30</option><option value="10:00">10g00</option><option value="13:30">13g30</option><option value="16:00">16g00</option><option value="18:30">18g30</option></select></label>
 
  <div class="exam-summary">Thời gian làm bài<select id="examDuration" aria-label="Chọn thời gian làm bài"><option value="120">120 phút</option><option value="90">90 phút</option></select><small>Chọn 90 hoặc 120 phút</small></div>
- <div class="exam-summary">Thời gian nộp bài<strong>10 phút</strong><small>Giữ cố định theo lịch trình mẫu</small></div>
+ <div class="exam-summary">Thời gian nộp bài<strong>10 phút</strong><small>Phân bổ ở các kỹ năng</small></div>
  <div class="exam-summary">Đã đánh dấu<strong id="examDone">0/7</strong><small>Chạm thẻ để đổi trạng thái</small></div>
 </div>
 <div class="exam-scroll"><div class="exam-inner"><div class="exam-caption">MỐC GIỜ TỰ ĐỘNG THEO CA ĐÃ CHỌN · KHÔNG KÉO THAY ĐỔI MỐC</div><div class="exam-axis" id="examAxis"><div class="exam-axis-line"></div><div class="exam-axis-fill" id="examAxisFill"></div><div class="exam-markers" id="examMarkers"></div></div><div class="exam-stage-grid" id="examStages"></div></div></div>
@@ -245,7 +252,7 @@
 <div class="card"><p>Trường hợp SV không làm phần Writing, CBCT vẫn tiếp tục yêu cầu SV truy cập quiz thi Writing và bấm nộp bài. CBCT ghi chú lên Danh sách thi tích hợp tại cột Ghi chú "Sinh viên không làm phần Writing".</p><div class="cte-gallery" id="cteGallery"></div></div>
 </section>
 <section class="page" id="page-tools">
-<div class="section-head"><div><h2>Công cụ nhanh</h2><p>Các tiện ích cục bộ, không kết nối hệ thống thi.</p></div></div>
+<div class="section-head"><div><h2>Công cụ hỗ trợ</h2><p></p></div></div>
 <div class="tools-grid">
 <article class="card"><h3>⏱️ Đồng hồ đếm ngược</h3><p class="smalltext">Nhập thời lượng</p><div class="field"><label for="timerMinutes">Số phút</label><input id="timerMinutes" max="600" min="1" type="number" value="60"/></div><div class="timer-display" id="timerDisplay">60:00</div><div class="row"><button class="btn primary" id="timerStart">Bắt đầu</button><button class="btn" id="timerPause">Tạm dừng</button><button class="btn" id="timerReset">Đặt lại</button></div><p class="smalltext muted">Không thay thế đồng hồ/thiết bị đếm giờ chính thức của kỳ thi.</p></article>
 
@@ -253,6 +260,26 @@
 
 
 
+
+<article class="card feedback-card" id="feedbackCard">
+<h3>✉ Gửi phản hồi về ca thi</h3>
+<p class="smalltext">Trong ca thi, CBCT ưu tiên trao đổi trực tiếp với nhân sự Trung tâm Khảo thí đang điều hành thi.</p>
+<form id="cbctFeedbackForm">
+<div class="feedback-grid">
+<div class="field"><label for="fbDate">Ngày thi *</label><input id="fbDate" name="Ngày thi" type="date" required></div>
+<div class="field"><label for="fbShift">Ca thi *</label><select id="fbShift" name="Ca thi" required><option value="">Chọn ca thi</option><option>07:30</option><option>10:00</option><option>13:30</option><option>16:00</option><option>18:30</option></select></div>
+<div class="field"><label for="fbRoom">Phòng thi *</label><select id="fbRoom" name="Phòng thi" required><option value="">Chọn phòng thi</option></select></div>
+<div class="field"><label for="fbCategory">Loại phản hồi *</label><select id="fbCategory" name="Loại phản hồi" required><option value="">Chọn loại phản hồi</option><option>Sự cố kỹ thuật / hệ thống thi</option><option>Tình huống sinh viên</option><option>Cơ sở vật chất / phòng thi</option><option>Hồ sơ / quy trình coi thi</option><option>Góp ý cải tiến</option><option>Khác</option></select></div>
+<div class="field"><label for="fbSender">Họ tên CBCT *</label><input id="fbSender" name="Họ tên CBCT" autocomplete="name" required maxlength="120" placeholder="Nhập họ tên"></div>
+<div class="field"><label for="fbContact">Email hoặc số điện thoại liên hệ</label><input id="fbContact" name="Liên hệ" maxlength="150" placeholder="Để Trung tâm phản hồi khi cần"></div>
+<div class="field feedback-wide"><label for="fbMessage">Nội dung phản hồi *</label><textarea id="fbMessage" name="Nội dung phản hồi" required minlength="10" maxlength="5000" placeholder="Mô tả cụ thể tình huống, thời điểm, nội dung cần hỗ trợ..."></textarea></div>
+</div>
+<input type="hidden" name="_subject" value="Phản hồi từ Cẩm nang CBCT - Văn Lang">
+<input type="hidden" name="Nguồn" value="Cẩm nang CBCT - GitHub Pages">
+<div class="row"><button class="btn primary" type="submit" id="fbSubmit">Gửi phản hồi</button><button class="btn" type="reset">Nhập lại</button></div>
+<div class="feedback-status" id="fbStatus" role="status" aria-live="polite"></div>
+<p class="smalltext muted"></p>
+</form></article>
 </div>
 </section>
 
@@ -294,5 +321,32 @@ $('examDuration').addEventListener('change',render);
 $('examStart').addEventListener('change',render);
 $('examReset').addEventListener('click',()=>{$('examStart').value='07:30';$('examDuration').value='120';done.clear();render()});render();
 })();
-</script></body>
+</script><script>
+
+/* KẾT NỐI FORMSPREE: thay YOUR_FORM_ID bằng ID Formspree, ví dụ xabcdxyz. */
+const CBCT_FORMSPREE_FORM_ID = 'mwllnawl';
+(function initCbctFeedback(){
+ const form=document.getElementById('cbctFeedbackForm');if(!form)return;
+ const room=document.getElementById('fbRoom');
+ const names=Array.from(document.querySelectorAll('#roomSelector option')).map(o=>({value:o.value,label:o.textContent.trim()})).filter(x=>x.value&&x.label);
+ const unique=new Set();names.forEach(x=>{if(unique.has(x.value))return;unique.add(x.value);const opt=document.createElement('option');opt.value=x.value;opt.textContent=x.label;room.appendChild(opt)});
+ const today=new Date();const local=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);document.getElementById('fbDate').value=local;
+ const status=document.getElementById('fbStatus'),btn=document.getElementById('fbSubmit');
+ const show=(msg,type)=>{status.textContent=msg;status.className='feedback-status '+(type||'')};
+ form.addEventListener('submit',async e=>{
+  e.preventDefault();if(!form.reportValidity())return;
+  const id=CBCT_FORMSPREE_FORM_ID.trim();
+  if(!/^[a-zA-Z0-9]{8,}$/.test(id)||id==='YOUR_FORM_ID') {show('Biểu mẫu chưa được kết nối Formspree. Quản trị viên cần thay YOUR_FORM_ID bằng Form ID thật trong file HTML rồi cập nhật GitHub Pages.','error');return;}
+  if(!navigator.onLine){show('Thiết bị đang ngoại tuyến. Vui lòng kết nối Internet rồi gửi lại.','error');return;}
+  btn.disabled=true;btn.textContent='Đang gửi…';show('Đang chuyển phản hồi đến Formspree…');
+  try{
+   const response=await fetch('https://formspree.io/f/'+id,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+   if(response.ok){show('Đã gửi phản hồi thành công.','success');form.reset();document.getElementById('fbDate').value=local;}
+   else {let msg='Không thể gửi phản hồi. Vui lòng thử lại.';try{const data=await response.json();if(data.errors?.length)msg+=' '+data.errors.map(x=>x.message).join('; ');}catch(_){}show(msg,'error');}
+  }catch(_){show('Không kết nối được Formspree. Kiểm tra mạng hoặc cấu hình biểu mẫu rồi thử lại.','error')}
+  finally{btn.disabled=false;btn.textContent='Gửi phản hồi'}
+ });
+})();
+</script>
+</body>
 </html>
