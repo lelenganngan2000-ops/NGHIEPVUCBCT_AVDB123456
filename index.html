@@ -395,7 +395,7 @@ const CBCT_FORMSPREE_FORM_ID = 'mwllnawl';
   const id=CBCT_FORMSPREE_FORM_ID.trim();
   if(!/^[a-zA-Z0-9]{8,}$/.test(id)||id==='YOUR_FORM_ID') {show('Biểu mẫu chưa được kết nối Formspree. Quản trị viên cần thay YOUR_FORM_ID bằng Form ID thật trong file HTML rồi cập nhật GitHub Pages.','error');return;}
   if(!navigator.onLine){show('Thiết bị đang ngoại tuyến. Vui lòng kết nối Internet rồi gửi lại.','error');return;}
-  btn.disabled=true;btn.textContent='Đang gửi…';show('Đang chuyển phản hồi đến Formspree…');
+  btn.disabled=true;btn.textContent='Đang gửi…';show('Đang chuyển phản hồi…');
   try{
    const response=await fetch('https://formspree.io/f/'+id,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
    if(response.ok){show('Đã gửi phản hồi thành công.','success');form.reset();document.getElementById('fbDate').value=local;}
